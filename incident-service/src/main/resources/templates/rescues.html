@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildGuard | Rescue Management</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 25px 16px;
+            font-family: Arial, sans-serif;
+            background: #f3f6f1;
+            color: #263b2e;
+        }
+
+        .container { max-width: 1150px; margin: auto; }
+
+        .header {
+            background: #244b38;
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+
+        .header h1 { margin: 0 0 8px; font-size: 26px; }
+        .header p { margin: 0; color: #dce8dd; font-size: 14px; }
+
+        .home-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+            background: white;
+            color: #244b38;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .home-btn:hover { background: #e7f0e8; }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border: 1px solid #e0e6dc;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            box-shadow: 0 5px 20px rgba(30, 55, 38, 0.06);
+        }
+
+        h2 { color: #244b38; margin: 0 0 20px; font-size: 20px; }
+
+        .subtitle { color: #6b766e; margin: -10px 0 22px; font-size: 14px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 22px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .full-width { grid-column: 1 / -1; }
+
+        label { font-size: 14px; font-weight: 600; color: #34483a; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #cbd5cc;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 14px;
+            background: white;
+            color: #263b2e;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #477b59;
+            box-shadow: 0 0 0 3px rgba(71, 123, 89, 0.12);
+        }
+
+        textarea { resize: vertical; }
+
+        .actions, .search-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actions { margin-top: 22px; }
+
+        button, .back-link {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .save { background: #245c3a; color: white; }
+        .save:hover { background: #19472b; }
+        .show { background: #27834a; color: white; }
+        .update { background: #477b59; color: white; }
+        .search { background: #3e6650; color: white; }
+        .delete { background: #b64236; color: white; }
+        .clear { background: #e8ede7; color: #263b2e; }
+        .back-link { background: #edf1e9; color: #34483a; }
+
+        .search-row { margin-bottom: 18px; }
+        .search-row input { flex: 1; min-width: 170px; }
+
+        .table-wrap { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e4e9e2;
+            text-align: left;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        th { background: #edf3eb; color: #244b38; }
+        tr:hover td { background: #fafcf9; }
+
+        .row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+        .row-actions button { padding: 8px 10px; }
+        .row-actions form { margin: 0; }
+
+        .notice {
+            padding: 13px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .success { background: #e7f5e9; color: #216333; }
+        .error { background: #fff0ed; color: #a32d20; }
+        .empty { padding: 18px; color: #718075; }
+
+        @media (max-width: 600px) {
+            body { padding: 14px 10px; }
+            .header, .card { padding: 20px 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: auto; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header class="header">
+        <h1>WildGuard</h1>
+        <p>Wildlife Rescue Management System</p>
+    </header>
+
+    <a class="home-btn" href="http://localhost:8080/">
+        &#8592; Home
+    </a>
+
+    <section class="card">
+        <h2 id="formTitle">Wildlife Rescue Record</h2>
+        <p class="subtitle">Enter the rescue, treatment and rehabilitation details below.</p>
+
+        <div class="notice success" th:if="${param.success != null}">
+            Rescue record saved successfully!
+        </div>
+
+        <div class="notice success" th:if="${param.updated != null}">
+            Rescue record updated successfully!
+        </div>
+
+        <div class="notice success" th:if="${param.deleted != null}">
+            Rescue record deleted successfully!
+        </div>
+
+        <div class="notice error" th:if="${param.error != null}">
+            Unable to complete the operation. Please check the details.
+        </div>
+
+        <div class="notice error" th:if="${param.error != null and param.notfound != null}">
+            No rescue record was found with that ID.
+        </div>
+
+        <form id="rescueForm" th:action="@{/rescues}"
+              th:object="${rescueCase}" method="post">
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="rescue_id">Rescue ID</label>
+                    <input type="number" id="rescue_id" th:field="*{rescue_id}"
+                           min="1" required>
+                    <span class="hint" style="font-size:12px;color:#718075;">
+                        Enter a unique ID for a new record.
+                    </span>
+                </div>
+
+                <div class="field">
+                    <label for="incident_id">Incident ID</label>
+                    <input type="number" id="incident_id"
+                           th:field="*{incident_id}" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="animal_id">Animal ID</label>
+                    <input type="number" id="animal_id"
+                           th:field="*{animal_id}" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="assigned_staff_id">Assigned Staff ID</label>
+                    <input type="number" id="assigned_staff_id"
+                           th:field="*{assigned_staff_id}" min="1" required>
+                </div>
+
+                <div class="field full-width">
+                    <label for="treatment_details">Treatment Details</label>
+                    <textarea id="treatment_details"
+                              th:field="*{treatment_details}"
+                              rows="4"
+                              placeholder="Describe treatment and care provided"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="rehabilitation_status">Rehabilitation Status</label>
+                    <select id="rehabilitation_status"
+                            th:field="*{rehabilitation_status}" required>
+                        <option value="">Select status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="UNDER_TREATMENT">Under Treatment</option>
+                        <option value="RECOVERED">Recovered</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="outcome">Outcome</label>
+                    <select id="outcome" th:field="*{outcome}">
+                        <option value="">Select outcome</option>
+                        <option value="Released">Released</option>
+                        <option value="Under Care">Under Care</option>
+                        <option value="Transferred">Transferred</option>
+                        <option value="Deceased">Deceased</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="rescue_date">Rescue Date</label>
+                    <input type="date" id="rescue_date"
+                           th:field="*{rescue_date}" required>
+                </div>
+
+                <div class="field">
+                    <label for="release_date">Release Date</label>
+                    <input type="date" id="release_date"
+                           th:field="*{release_date}">
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save" id="submitBtn">Add Rescue Record</button>
+
+                <button type="button" class="clear" id="cancelBtn"
+                        onclick="resetRescueForm()" hidden>
+                    Cancel Update
+                </button>
+
+                <button type="reset" class="clear" id="resetBtn">
+                    Clear Form
+                </button>
+
+                <a class="back-link" th:href="@{/}">Back to Home</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Manage Rescue Records</h2>
+
+        <div class="search-row">
+            <input type="number" id="searchId" min="1"
+                   placeholder="Enter Rescue ID">
+            <button type="button" class="search" onclick="searchRescue()">Search by ID</button>
+            <button type="button" class="show" onclick="showAllRescues()">Show All</button>
+            <button type="button" class="clear" onclick="hideAllRescues()">Hide All</button>
+            <button type="button" class="clear" onclick="clearRescueSearch()">Clear Search</button>
+        </div>
+
+        <div id="rescuesContent" style="display:none;">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Rescue ID</th>
+                        <th>Incident ID</th>
+                        <th>Animal ID</th>
+                        <th>Assigned Staff</th>
+                        <th>Treatment Details</th>
+                        <th>Rehabilitation</th>
+                        <th>Outcome</th>
+                        <th>Rescue Date</th>
+                        <th>Release Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="rescueTable">
+                    <tr th:each="rescue : ${rescueCases}"
+                        th:data-id="${rescue.rescue_id}"
+                        th:data-incident="${rescue.incident_id}"
+                        th:data-animal="${rescue.animal_id}"
+                        th:data-staff="${rescue.assigned_staff_id}"
+                        th:data-treatment="${rescue.treatment_details}"
+                        th:data-rehabilitation="${rescue.rehabilitation_status}"
+                        th:data-outcome="${rescue.outcome}"
+                        th:data-rescue-date="${rescue.rescue_date}"
+                        th:data-release-date="${rescue.release_date}">
+
+                        <td th:text="${rescue.rescue_id}"></td>
+                        <td th:text="${rescue.incident_id}"></td>
+                        <td th:text="${rescue.animal_id}"></td>
+                        <td th:text="${rescue.assigned_staff_id}"></td>
+                        <td th:text="${rescue.treatment_details}"></td>
+                        <td th:text="${rescue.rehabilitation_status}"></td>
+                        <td th:text="${rescue.outcome}"></td>
+                        <td th:text="${rescue.rescue_date}"></td>
+                        <td th:text="${rescue.release_date != null ? rescue.release_date : '-'}"></td>
+
+                        <td>
+                            <div class="row-actions">
+                                <button type="button" class="update edit-btn">Edit</button>
+
+                                <form th:action="@{/rescues/delete/{id}(id=${rescue.rescue_id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete this rescue record?');">
+                                    <button type="submit" class="delete">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="tableMessage" class="empty"
+               th:if="${rescueCases == null or #lists.isEmpty(rescueCases)}">
+                No rescue records found.
+            </p>
+            <p id="searchMessage" class="empty" style="display:none;"></p>
+        </div>
+    </section>
+</div>
+
+<script>
+    const form = document.getElementById("rescueForm");
+    const originalAction = form.getAttribute("action");
+    const rescueContent = document.getElementById("rescuesContent");
+    const rescueTable = document.getElementById("rescueTable");
+    const searchMessage = document.getElementById("searchMessage");
+
+    let editingRescueId = null;
+
+    function showAllRescues() {
+        document.getElementById("searchId").value = "";
+        searchMessage.style.display = "none";
+        Array.from(rescueTable.rows).forEach(row => row.style.display = "");
+        rescueContent.style.display = "block";
+    }
+
+    function hideAllRescues() {
+        rescueContent.style.display = "none";
+    }
+
+    function searchRescue() {
+        const id = document.getElementById("searchId").value.trim();
+
+        if (!id || Number(id) < 1) {
+            alert("Please enter a valid Rescue ID.");
+            return;
+        }
+
+        rescueContent.style.display = "block";
+        searchMessage.style.display = "none";
+
+        let found = false;
+
+        Array.from(rescueTable.rows).forEach(row => {
+            const matches = row.dataset.id === id;
+            row.style.display = matches ? "" : "none";
+            if (matches) found = true;
+        });
+
+        if (!found) {
+            searchMessage.textContent = "No rescue record found with ID " + id + ".";
+            searchMessage.style.display = "block";
+        }
+    }
+
+    function clearRescueSearch() {
+        document.getElementById("searchId").value = "";
+        searchMessage.style.display = "none";
+        Array.from(rescueTable.rows).forEach(row => row.style.display = "");
+    }
+
+    function editRescue(row) {
+        editingRescueId = row.dataset.id;
+
+        document.getElementById("rescue_id").value = row.dataset.id;
+        document.getElementById("incident_id").value = row.dataset.incident;
+        document.getElementById("animal_id").value = row.dataset.animal;
+        document.getElementById("assigned_staff_id").value = row.dataset.staff;
+        document.getElementById("treatment_details").value = row.dataset.treatment || "";
+        document.getElementById("rehabilitation_status").value = row.dataset.rehabilitation || "";
+        document.getElementById("outcome").value = row.dataset.outcome || "";
+        document.getElementById("rescue_date").value = row.dataset.rescueDate || "";
+        document.getElementById("release_date").value = row.dataset.releaseDate || "";
+
+        document.getElementById("rescue_id").readOnly = true;
+        form.action = "/rescues/update/" + encodeURIComponent(editingRescueId);
+        document.getElementById("formTitle").textContent = "Update Rescue Record";
+        document.getElementById("submitBtn").textContent = "Update Rescue Record";
+        document.getElementById("cancelBtn").hidden = false;
+
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    rescueTable.addEventListener("click", function(event) {
+        const button = event.target.closest(".edit-btn");
+        if (!button) return;
+
+        const row = button.closest("tr");
+        if (row) editRescue(row);
+    });
+
+    function resetRescueForm() {
+        form.reset();
+        editingRescueId = null;
+        form.action = originalAction;
+        document.getElementById("rescue_id").readOnly = false;
+        document.getElementById("formTitle").textContent = "Wildlife Rescue Record";
+        document.getElementById("submitBtn").textContent = "Add Rescue Record";
+        document.getElementById("cancelBtn").hidden = true;
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", function() {
+        setTimeout(() => {
+            if (editingRescueId !== null) {
+                resetRescueForm();
+            }
+        }, 0);
+    });
+
+    document.getElementById("searchId").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchRescue();
+        }
+    });
+</script>
+</body>
+</html>

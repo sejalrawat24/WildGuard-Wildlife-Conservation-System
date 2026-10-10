@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildGuard | Incident Management</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 25px 16px;
+            font-family: Arial, sans-serif;
+            background: #f3f6f1;
+            color: #263b2e;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        .header {
+            background: #244b38;
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+
+        .header h1 { margin: 0 0 8px; font-size: 26px; }
+        .header p { margin: 0; color: #dce8dd; font-size: 14px; }
+
+        .home-btn {
+            display: inline-block;
+            padding: 11px 17px;
+            margin: 0 0 22px;
+            border-radius: 6px;
+            background: #245c3a;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .home-btn:hover {
+            background: #19472b;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border: 1px solid #e0e6dc;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            box-shadow: 0 5px 20px rgba(30, 55, 38, 0.06);
+        }
+
+        h2 {
+            color: #244b38;
+            margin: 0 0 20px;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 22px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .full-width { grid-column: 1 / -1; }
+
+        label { font-size: 14px; font-weight: 600; color: #34483a; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #cbd5cc;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 14px;
+            background: white;
+            color: #263b2e;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #477b59;
+            box-shadow: 0 0 0 3px rgba(71, 123, 89, 0.12);
+        }
+
+        textarea { resize: vertical; }
+
+        .hint { color: #718075; font-size: 12px; font-weight: normal; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        button, .back-link {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .save { background: #245c3a; color: white; }
+        .save:hover { background: #19472b; }
+        .show { background: #27834a; color: white; }
+        .update { background: #477b59; color: white; }
+        .search { background: #3e6650; color: white; }
+        .delete { background: #b64236; color: white; }
+        .clear { background: #e8ede7; color: #263b2e; }
+        .back-link { background: #edf1e9; color: #34483a; }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .search-row input { flex: 1; min-width: 170px; }
+
+        .table-wrap { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e4e9e2;
+            text-align: left;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        th { background: #edf3eb; color: #244b38; }
+        tr:hover td { background: #fafcf9; }
+        .row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+        .row-actions button { padding: 8px 10px; }
+
+        #message {
+            display: none;
+            padding: 13px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        #message.success { display: block; background: #e7f5e9; color: #216333; }
+        #message.error { display: block; background: #fff0ed; color: #a32d20; }
+
+        .empty { padding: 18px; color: #718075; }
+
+        @media (max-width: 600px) {
+            body { padding: 14px 10px; }
+            .header, .card { padding: 20px 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: auto; }
+            .actions button, .actions a { text-align: center; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header class="header">
+        <h1>WildGuard</h1>
+        <p>Wildlife Incident Management System</p>
+    </header>
+
+    <!-- HOME BUTTON -->
+    <a class="home-btn" href="http://localhost:8080/">
+        &#8592; Home
+    </a>
+
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <section class="card">
+        <h2 id="formTitle">Report a Wildlife Incident</h2>
+
+        <form id="incidentForm">
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="incident_id">Incident ID</label>
+                    <input type="number" id="incident_id" min="1" required>
+                    <span class="hint">Enter a unique ID for a new incident.</span>
+                </div>
+
+                <div class="field">
+                    <label for="incident_type">Incident Type</label>
+                    <select id="incident_type" required>
+                        <option value="">Select incident type</option>
+                        <option value="Poaching">Poaching</option>
+                        <option value="Illegal Hunting">Illegal Hunting</option>
+                        <option value="Animal Injury">Animal Injury</option>
+                        <option value="Forest Fire">Forest Fire</option>
+                        <option value="Habitat Destruction">Habitat Destruction</option>
+                        <option value="Human-Wildlife Conflict">Human-Wildlife Conflict</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="field full-width">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" required
+                              placeholder="Describe the incident and its location"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="zone_id">Zone ID</label>
+                    <input type="number" id="zone_id" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="animal_id">Animal ID <span class="hint">(Optional)</span></label>
+                    <input type="number" id="animal_id" min="0" value="0">
+                </div>
+
+                <div class="field">
+                    <label for="reported_by">Reported By (Staff ID)</label>
+                    <input type="number" id="reported_by" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="assigned_to">Assigned To (Staff ID)</label>
+                    <input type="number" id="assigned_to" min="0" value="0">
+                </div>
+
+                <div class="field">
+                    <label for="priority">Priority</label>
+                    <select id="priority" required>
+                        <option value="">Select priority</option>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="status">Status</label>
+                    <select id="status" required>
+                        <option value="">Select status</option>
+                        <option value="OPEN">Open</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="RESOLVED">Resolved</option>
+                    </select>
+                </div>
+
+                <div class="field full-width">
+                    <label for="reported_at">Reported At</label>
+                    <input type="datetime-local" id="reported_at" required>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save" id="submitBtn">Add Incident</button>
+                <button type="button" class="clear" id="cancelBtn" onclick="resetForm()" hidden>
+                    Cancel Update
+                </button>
+                <button type="reset" class="clear" onclick="prepareReset()">Clear Form</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Manage Incidents</h2>
+
+        <div class="search-row">
+            <input type="number" id="searchId" min="1" placeholder="Enter Incident ID">
+            <button type="button" class="search" onclick="searchIncident()">Search by ID</button>
+            <button type="button" class="show" onclick="showAllIncidents()">Show All</button>
+            <button type="button" class="clear" onclick="hideAllIncidents()">Hide All</button>
+            <button type="button" class="clear" onclick="clearSearch()">Clear Search</button>
+        </div>
+
+        <div id="incidentsContent" style="display:none;">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Zone</th>
+                        <th>Animal</th>
+                        <th>Reported By</th>
+                        <th>Assigned To</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Reported At</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="incidentTable"></tbody>
+                </table>
+            </div>
+            <p id="tableMessage" class="empty"></p>
+        </div>
+    </section>
+</div>
+
+<script>
+    const API_URL = "/incidents";
+    const form = document.getElementById("incidentForm");
+    const message = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
+    const tableBody = document.getElementById("incidentTable");
+    const content = document.getElementById("incidentsContent");
+    const tableMessage = document.getElementById("tableMessage");
+
+    let editingId = null;
+    let allIncidents = [];
+
+    function showMessage(text, type) {
+        message.textContent = text;
+        message.className = type;
+    }
+
+    function clearMessage() {
+        message.textContent = "";
+        message.className = "";
+    }
+
+    function setCurrentDateTime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById("reported_at").value = now.toISOString().slice(0, 16);
+    }
+
+    function getFormData() {
+        const reportedAt = document.getElementById("reported_at").value;
+
+        return {
+            incident_id: Number(document.getElementById("incident_id").value),
+            incident_type: document.getElementById("incident_type").value,
+            description: document.getElementById("description").value.trim(),
+            zone_id: Number(document.getElementById("zone_id").value),
+            animal_id: Number(document.getElementById("animal_id").value || 0),
+            reported_by: Number(document.getElementById("reported_by").value),
+            assigned_to: Number(document.getElementById("assigned_to").value || 0),
+            priority: document.getElementById("priority").value,
+            status: document.getElementById("status").value,
+            reported_at: reportedAt ? reportedAt + ":00" : null
+        };
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearMessage();
+
+        const isUpdate = editingId !== null;
+        submitBtn.disabled = true;
+        submitBtn.textContent = isUpdate ? "Updating..." : "Adding...";
+
+        const incident = getFormData();
+
+        try {
+            const response = await fetch(
+                isUpdate ? `${API_URL}/${editingId}` : API_URL,
+                {
+                    method: isUpdate ? "PUT" : "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(incident)
+                }
+            );
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                throw new Error(result || `Request failed (${response.status})`);
+            }
+
+            showMessage(
+                result || (isUpdate
+                    ? "Incident updated successfully."
+                    : "Incident added successfully."),
+                "success"
+            );
+
+            resetForm(false);
+
+            if (content.style.display !== "none") {
+                await loadIncidents();
+            }
+        } catch (error) {
+            showMessage("Error: " + error.message, "error");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = editingId === null ? "Add Incident" : "Update Incident";
+        }
+    });
+
+    function prepareReset() {
+        setTimeout(() => {
+            if (editingId === null) {
+                clearMessage();
+                setCurrentDateTime();
+            }
+        }, 0);
+    }
+
+    function resetForm(clearNotice = true) {
+        form.reset();
+        editingId = null;
+        document.getElementById("incident_id").readOnly = false;
+        document.getElementById("formTitle").textContent = "Report a Wildlife Incident";
+        submitBtn.textContent = "Add Incident";
+        document.getElementById("cancelBtn").hidden = true;
+        setCurrentDateTime();
+
+        if (clearNotice) clearMessage();
+    }
+
+    async function loadIncidents() {
+        content.style.display = "block";
+        tableBody.innerHTML = "";
+        tableMessage.textContent = "Loading incidents...";
+
+        try {
+            const response = await fetch(`${API_URL}/all`);
+
+            if (!response.ok) {
+                throw new Error("Could not load incidents.");
+            }
+
+            allIncidents = await response.json();
+            renderIncidents(allIncidents);
+        } catch (error) {
+            tableMessage.textContent = error.message;
+            showMessage("Error: " + error.message, "error");
+        }
+    }
+
+    function addCell(row, value) {
+        const cell = row.insertCell();
+        cell.textContent =
+            value === null || value === undefined || value === "" ? "-" : value;
+        return cell;
+    }
+
+    function renderIncidents(incidents) {
+        tableBody.innerHTML = "";
+
+        if (!incidents.length) {
+            tableMessage.textContent = "No incidents found.";
+            return;
+        }
+
+        tableMessage.textContent = "";
+
+        incidents.forEach(incident => {
+            const row = tableBody.insertRow();
+
+            addCell(row, incident.incident_id);
+            addCell(row, incident.incident_type);
+            addCell(row, incident.description);
+            addCell(row, incident.zone_id);
+            addCell(row, incident.animal_id || "-");
+            addCell(row, incident.reported_by);
+            addCell(row, incident.assigned_to || "-");
+            addCell(row, incident.priority);
+            addCell(row, incident.status);
+            addCell(
+                row,
+                incident.reported_at
+                    ? String(incident.reported_at).replace("T", " ")
+                    : "-"
+            );
+
+            const actionCell = row.insertCell();
+            actionCell.className = "row-actions";
+
+            const editBtn = document.createElement("button");
+            editBtn.textContent = "Edit";
+            editBtn.className = "update";
+            editBtn.type = "button";
+            editBtn.addEventListener("click", () => editIncident(incident));
+            actionCell.appendChild(editBtn);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "delete";
+            deleteBtn.type = "button";
+            deleteBtn.addEventListener(
+                "click",
+                () => deleteIncident(incident.incident_id)
+            );
+            actionCell.appendChild(deleteBtn);
+        });
+    }
+
+    async function showAllIncidents() {
+        document.getElementById("searchId").value = "";
+        await loadIncidents();
+    }
+
+    function hideAllIncidents() {
+        content.style.display = "none";
+    }
+
+    async function searchIncident() {
+        const id = document.getElementById("searchId").value;
+
+        if (!id || Number(id) < 1) {
+            showMessage("Please enter a valid Incident ID.", "error");
+            return;
+        }
+
+        clearMessage();
+        content.style.display = "block";
+        tableBody.innerHTML = "";
+        tableMessage.textContent = "Searching...";
+
+        try {
+            const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`);
+
+            if (response.status === 404) {
+                renderIncidents([]);
+                showMessage("No incident found with ID " + id + ".", "error");
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Unable to search for this incident.");
+            }
+
+            const incident = await response.json();
+            renderIncidents([incident]);
+        } catch (error) {
+            tableMessage.textContent = error.message;
+            showMessage("Error: " + error.message, "error");
+        }
+    }
+
+    function clearSearch() {
+        document.getElementById("searchId").value = "";
+
+        if (content.style.display !== "none") {
+            renderIncidents(allIncidents);
+        }
+
+        clearMessage();
+    }
+
+    function editIncident(incident) {
+        editingId = incident.incident_id;
+
+        document.getElementById("incident_id").value = incident.incident_id;
+        document.getElementById("incident_id").readOnly = true;
+        document.getElementById("incident_type").value = incident.incident_type || "";
+        document.getElementById("description").value = incident.description || "";
+        document.getElementById("zone_id").value = incident.zone_id || "";
+        document.getElementById("animal_id").value = incident.animal_id || 0;
+        document.getElementById("reported_by").value = incident.reported_by || "";
+        document.getElementById("assigned_to").value = incident.assigned_to || 0;
+        document.getElementById("priority").value = incident.priority || "";
+        document.getElementById("status").value = incident.status || "";
+
+        if (incident.reported_at) {
+            document.getElementById("reported_at").value =
+                String(incident.reported_at).slice(0, 16);
+        } else {
+            setCurrentDateTime();
+        }
+
+        document.getElementById("formTitle").textContent = "Update Incident";
+        submitBtn.textContent = "Update Incident";
+        document.getElementById("cancelBtn").hidden = false;
+
+        clearMessage();
+
+        form.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
+    async function deleteIncident(id) {
+        if (!confirm(`Are you sure you want to delete incident ${id}?`)) {
+            return;
+        }
+
+        clearMessage();
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                throw new Error(result || "Failed to delete incident.");
+            }
+
+            showMessage(result || "Incident deleted successfully.", "success");
+
+            if (editingId === id) {
+                resetForm(false);
+            }
+
+            if (content.style.display !== "none") {
+                await loadIncidents();
+            }
+        } catch (error) {
+            showMessage("Error: " + error.message, "error");
+        }
+    }
+
+    document.getElementById("searchId").addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchIncident();
+        }
+    });
+
+    setCurrentDateTime();
+</script>
+</body>
+</html>

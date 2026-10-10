@@ -1,0 +1,636 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildlife Conservation Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f3f6f1;
+            color: #26352a;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background: #173e2a;
+            color: white;
+            padding: 25px 16px;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .brand span {
+            display: block;
+            color: #b9d9a7;
+            font-size: 13px;
+            font-weight: normal;
+        }
+
+        .nav-title {
+            color: #a8c6b0;
+            font-size: 11px;
+            letter-spacing: 1.3px;
+            margin: 23px 10px 10px;
+        }
+
+        .nav-link {
+            display: block;
+            color: #e8f1e9;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #2b6040;
+            color: white;
+        }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .muted {
+            color: #78857a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .profile {
+            background: white;
+            padding: 12px 17px;
+            border: 1px solid #e2e9df;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .welcome {
+            background: linear-gradient(120deg, #205637, #39764b);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 28px;
+        }
+
+        .welcome h2 {
+            font-size: 25px;
+            margin-bottom: 12px;
+        }
+
+        .welcome p {
+            line-height: 1.7;
+            max-width: 700px;
+            color: #e0eee1;
+        }
+
+        .section-heading {
+            font-size: 20px;
+            margin-bottom: 17px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e4e9e1;
+            border-radius: 13px;
+            padding: 23px;
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 13px;
+        }
+
+        .card h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .online {
+            background: #e2f5e7;
+            color: #267342;
+        }
+
+        .offline {
+            background: #fde8e5;
+            color: #a52f26;
+        }
+
+        .card a {
+            display: inline-block;
+            color: #27623c;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 5px;
+        }
+
+        .card a:hover {
+            text-decoration: underline;
+        }
+
+        .port {
+            color: #78857a;
+            font-size: 12px;
+            margin-top: 9px;
+        }
+
+        /* STATISTICS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e4e9e1;
+            border-left: 5px solid #398052;
+            border-radius: 13px;
+            padding: 22px;
+            box-shadow: 0 3px 10px rgba(23, 62, 42, 0.04);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #78857a;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #27623c;
+        }
+
+        .stat-description {
+            color: #78857a;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e4e9e1;
+            border-radius: 13px;
+            padding: 23px;
+            margin-bottom: 25px;
+        }
+
+        .panel h3 {
+            margin-bottom: 15px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 25px;
+        }
+
+        .action-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 0;
+            border-bottom: 1px solid #edf0eb;
+            color: #304534;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .action-link:hover {
+            color: #267342;
+        }
+
+        .action-link span:last-child {
+            color: #4c8057;
+            font-size: 19px;
+        }
+
+        .system-info {
+            color: #78857a;
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 12px;
+            color: #859086;
+        }
+
+        @media (max-width: 1000px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .main {
+                padding: 22px 16px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .cards,
+            .quick-links,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+             Wildlife Conservation
+            <span>Management Portal</span>
+        </div>
+
+        <div class="nav-title">MAIN MENU</div>
+        <a href="/" class="nav-link active">⌂ &nbsp; Dashboard</a>
+
+        <div class="nav-title">WILDLIFE MANAGEMENT</div>
+        <a href="http://localhost:8081/animals"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Animals
+        </a>
+
+        <a href="http://localhost:8081/api/protected-areas"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Protected Areas
+        </a>
+
+        <div class="nav-title">CONSERVATION</div>
+        <a href="http://localhost:8082/programmes"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Programmes
+        </a>
+
+        <div class="nav-title">INCIDENTS & RESCUE</div>
+        <a href="http://localhost:8083/incidents"
+           target="_blank" rel="noopener" class="nav-link">
+            ️ &nbsp; Incidents
+        </a>
+
+        <a href="http://localhost:8083/rescues"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Rescue Cases
+        </a>
+
+        <div class="nav-title">FIELD OPERATIONS</div>
+        <a href="http://localhost:8084/staff"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Staff
+        </a>
+
+        <a href="http://localhost:8084/patrols"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Patrols
+        </a>
+
+        <a href="http://localhost:8084/resources"
+           target="_blank" rel="noopener" class="nav-link">
+             &nbsp; Resources
+        </a>
+
+        <div class="nav-title">ACCOUNT</div>
+        <a href="/login" class="nav-link">↪ &nbsp; Login Page</a>
+
+    </aside>
+
+    <!-- MAIN DASHBOARD -->
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="muted">
+                    Wildlife Conservation Management System
+                </p>
+            </div>
+
+            <div class="profile">
+                 &nbsp; Conservation Portal
+            </div>
+        </header>
+
+        <!-- WELCOME -->
+        <section class="welcome">
+            <h2>Welcome to the Conservation Portal</h2>
+            <p>
+                Manage wildlife records, monitor conservation programmes,
+                access rescue operations, and coordinate field teams
+                from one central dashboard.
+            </p>
+        </section>
+
+        <!-- WILDLIFE STATISTICS -->
+        <h2 class="section-heading">Wildlife Statistics</h2>
+
+        <section class="stats-grid">
+
+            <article class="stat-card">
+                <h3>Total Animals</h3>
+                <p class="stat-number" th:text="${stats.totalAnimals}">0</p>
+                <p class="stat-description">Registered animals</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Healthy Animals</h3>
+                <p class="stat-number" th:text="${stats.healthyAnimals}">0</p>
+                <p class="stat-description">Animals marked healthy</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Injured Animals</h3>
+                <p class="stat-number" th:text="${stats.injuredAnimals}">0</p>
+                <p class="stat-description">Animals marked injured</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Conservation Programmes</h3>
+                <p class="stat-number" th:text="${stats.totalProgrammes}">0</p>
+                <p class="stat-description">Total programmes</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Total Incidents</h3>
+                <p class="stat-number" th:text="${stats.totalIncidents}">0</p>
+                <p class="stat-description">Reported incidents</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Rescue Cases</h3>
+                <p class="stat-number" th:text="${stats.totalRescues}">0</p>
+                <p class="stat-description">Total rescue cases</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Total Patrols</h3>
+                <p class="stat-number" th:text="${stats.totalPatrols}">0</p>
+                <p class="stat-description">All patrol assignments</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Scheduled Patrols</h3>
+                <p class="stat-number" th:text="${stats.scheduledPatrols}">0</p>
+                <p class="stat-description">Patrols awaiting execution</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Ongoing Patrols</h3>
+                <p class="stat-number" th:text="${stats.ongoingPatrols}">0</p>
+                <p class="stat-description">Patrols in progress</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Completed Patrols</h3>
+                <p class="stat-number" th:text="${stats.completedPatrols}">0</p>
+                <p class="stat-description">Finished patrols</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Total Staff</h3>
+                <p class="stat-number" th:text="${stats.totalStaff}">0</p>
+                <p class="stat-description">Registered field staff</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Total Resources</h3>
+                <p class="stat-number" th:text="${stats.totalResources}">0</p>
+                <p class="stat-description">Registered field resources</p>
+            </article>
+
+        </section>
+
+        <!-- SERVICE STATUS -->
+        <h2 class="section-heading">Backend Services</h2>
+
+        <section class="cards">
+
+            <article class="card">
+                <div class="card-icon">🐾</div>
+                <h3>Wildlife Service</h3>
+                <p class="muted">Manage animals and protected areas.</p>
+
+                <span class="status"
+                      th:classappend="${wildlifeStatus == 'Online'} ? ' online' : ' offline'"
+                      th:text="${wildlifeStatus}">Checking...</span>
+
+                <br>
+
+                <a href="http://localhost:8081/animals"
+                   target="_blank" rel="noopener">
+                    Open Wildlife Management →
+                </a>
+
+                <p class="port">Port: 8081</p>
+            </article>
+
+            <article class="card">
+                <div class="card-icon">🌱</div>
+                <h3>Conservation Service</h3>
+                <p class="muted">Manage conservation programmes.</p>
+
+                <span class="status"
+                      th:classappend="${conservationStatus == 'Online'} ? ' online' : ' offline'"
+                      th:text="${conservationStatus}">Checking...</span>
+
+                <br>
+
+                <a href="http://localhost:8082/programmes"
+                   target="_blank" rel="noopener">
+                    Open Conservation Programmes →
+                </a>
+
+                <p class="port">Port: 8082</p>
+            </article>
+
+            <article class="card">
+                <div class="card-icon">🚑</div>
+                <h3>Incident &amp; Rescue Service</h3>
+                <p class="muted">Manage incident reports and rescue cases.</p>
+
+                <span class="status"
+                      th:classappend="${incidentStatus == 'Online'} ? ' online' : ' offline'"
+                      th:text="${incidentStatus}">Checking...</span>
+
+                <br>
+
+                <a href="http://localhost:8083/incidents"
+                   target="_blank" rel="noopener">
+                    Open Incident Management →
+                </a>
+
+                <p class="port">Port: 8083</p>
+            </article>
+
+            <article class="card">
+                <div class="card-icon">👥</div>
+                <h3>Field Operations Service</h3>
+                <p class="muted">Manage staff, patrols and resources.</p>
+
+                <span class="status"
+                      th:classappend="${fieldStatus == 'Online'} ? ' online' : ' offline'"
+                      th:text="${fieldStatus}">Checking...</span>
+
+                <br>
+
+                <a href="http://localhost:8084/staff"
+                   target="_blank" rel="noopener">
+                    Open Field Operations →
+                </a>
+
+                <p class="port">Port: 8084</p>
+            </article>
+
+        </section>
+
+        <!-- QUICK ACCESS -->
+        <section class="panel">
+            <h3>Quick Access</h3>
+
+            <div class="quick-links">
+
+                <a class="action-link" href="http://localhost:8081/animals"
+                   target="_blank" rel="noopener">
+                    <span>🐾 Animal Management</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8081/api/protected-areas"
+                   target="_blank" rel="noopener">
+                    <span> Protected Areas</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8082/programmes"
+                   target="_blank" rel="noopener">
+                    <span>Conservation Programmes</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8083/incidents"
+                   target="_blank" rel="noopener">
+                    <span> Incident Management</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8083/rescues"
+                   target="_blank" rel="noopener">
+                    <span> Rescue Management</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8084/staff"
+                   target="_blank" rel="noopener">
+                    <span> Staff Management</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8084/patrols"
+                   target="_blank" rel="noopener">
+                    <span> Patrol Management</span><span>→</span>
+                </a>
+
+                <a class="action-link" href="http://localhost:8084/resources"
+                   target="_blank" rel="noopener">
+                    <span> Resource Management</span><span>→</span>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- SYSTEM INFORMATION -->
+        <section class="panel">
+            <h3>System Information</h3>
+
+            <div class="system-info">
+                <p><strong>UI Service:</strong> Port 8080</p>
+                <p><strong>Wildlife Service:</strong> Port 8081</p>
+                <p><strong>Conservation Service:</strong> Port 8082</p>
+                <p><strong>Incident &amp; Rescue Service:</strong> Port 8083</p>
+                <p><strong>Field Operations Service:</strong> Port 8084</p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            Wildlife Conservation Management System
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>

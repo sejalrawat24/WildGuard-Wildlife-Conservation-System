@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conservation Programmes</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5ef;
+            color: #263b2e;
+        }
+
+        header {
+            background: #244b38;
+            color: white;
+            padding: 22px 8%;
+        }
+
+        header h1 { margin: 0; }
+        header p { margin-bottom: 0; color: #dce8dd; }
+
+        .home-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 18px;
+            background: white;
+            color: #244b38;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .home-btn:hover {
+            background: #e7f0e8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 18px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            margin-bottom: 25px;
+        }
+
+        h2 { color: #244b38; margin-top: 0; }
+        .subtitle { color: #6b766e; margin-bottom: 25px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+        label { font-size: 14px; font-weight: bold; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5cc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 8px;
+        }
+
+        textarea { resize: vertical; }
+
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #9bb9a3;
+        }
+
+        button, .back-link {
+            display: inline-block;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 3px;
+        }
+
+        .save-btn, .action-btn {
+            background: #244b38;
+            color: white;
+        }
+
+        .save-btn:hover, .action-btn:hover { background: #1c5734; }
+
+        .reset-btn, .hide-btn {
+            background: #e8ede7;
+            color: #263b2e;
+        }
+
+        .search-btn { background: #2867a5; color: white; }
+        .delete-btn { background: #b83232; color: white; }
+        .delete-btn:hover { background: #8f2424; }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            background: #e5f3e7;
+            color: #245c32;
+        }
+
+        .error { background: #fbe8e6; color: #8b2923; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #244b38;
+            padding-left: 0;
+        }
+
+        .management {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .search-input {
+            max-width: 220px;
+            margin: 3px;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            min-width: 1150px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e6e0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th { background: #e7f0e8; color: #245c3a; }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .planned { background: #fff0c2; color: #795900; }
+        .ongoing { background: #d8ebff; color: #14518a; }
+        .completed { background: #d8f3df; color: #17632d; }
+
+        .edit-form { min-width: 250px; }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #68756b;
+        }
+
+        #programmeTable { display: none; }
+
+        #searchMessage {
+            color: #245c3a;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: auto; }
+            .form-card { padding: 22px 18px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Wildlife Conservation System</h1>
+    <p>Conservation Programme Management</p>
+
+    <a href="http://localhost:8080/" class="home-btn">
+        ← Home
+    </a>
+</header>
+
+<div class="container">
+
+    <!-- ADD PROGRAMME -->
+    <div class="form-card">
+        <h2>Conservation Programme Form</h2>
+        <p class="subtitle">Enter the programme details below.</p>
+
+        <div class="message" th:if="${param.success != null}">
+            Programme saved successfully!
+        </div>
+
+        <div class="message" th:if="${param.updated != null}">
+            Programme updated successfully!
+        </div>
+
+        <div class="message" th:if="${param.deleted != null}">
+            Programme deleted successfully!
+        </div>
+
+        <div class="message error" th:if="${param.error != null}">
+            Operation failed. Please check the details.
+        </div>
+
+        <form th:action="@{/programmes}" th:object="${programme}" method="post">
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="programme_id">Programme ID:</label>
+                    <input type="number" id="programme_id"
+                           th:field="*{programme_id}" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="programme_name">Programme Name:</label>
+                    <input type="text" id="programme_name"
+                           th:field="*{programme_name}" required>
+                </div>
+
+                <div class="field full-width">
+                    <label for="description">Description:</label>
+                    <textarea id="description" th:field="*{description}"
+                              rows="4" required></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="coordinator_id">Coordinator ID:</label>
+                    <input type="number" id="coordinator_id"
+                           th:field="*{coordinator_id}" min="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="target">Target:</label>
+                    <input type="number" id="target" th:field="*{target}"
+                           min="0" step="0.01" required>
+                </div>
+
+                <div class="field">
+                    <label for="achieved">Achieved:</label>
+                    <input type="number" id="achieved" th:field="*{achieved}"
+                           min="0" step="0.01" required>
+                </div>
+
+                <div class="field">
+                    <label for="status">Status:</label>
+                    <select id="status" th:field="*{status}" required>
+                        <option value="">Select Status</option>
+                        <option value="PLANNED">Planned</option>
+                        <option value="ONGOING">Ongoing</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date"
+                           th:field="*{start_date}" required>
+                </div>
+
+                <div class="field">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date"
+                           th:field="*{end_date}" required>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="save-btn">Save Programme</button>
+                <button type="reset" class="reset-btn">Clear Form</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- PROGRAMME MANAGEMENT -->
+    <div class="form-card">
+        <h2>All Conservation Programmes</h2>
+
+        <div class="management">
+            <button type="button" class="action-btn" onclick="showAll()">
+                Show All
+            </button>
+
+            <button type="button" class="hide-btn" onclick="hideAll()">
+                Hide All
+            </button>
+
+            <input type="number" id="searchId" class="search-input"
+                   placeholder="Enter Programme ID" min="1">
+
+            <button type="button" class="search-btn" onclick="searchProgramme()">
+                Search by ID
+            </button>
+
+            <button type="button" class="hide-btn" onclick="clearSearch()">
+                Clear Search
+            </button>
+        </div>
+
+        <p id="searchMessage"></p>
+
+        <div class="table-wrapper">
+            <table id="programmeTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Coordinator</th>
+                    <th>Target</th>
+                    <th>Achieved</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+
+                <tbody id="programmeTableBody">
+                <tr th:each="p : ${programmes}"
+                    th:attr="data-programme-id=${p.programme_id}">
+
+                    <td th:text="${p.programme_id}"></td>
+                    <td th:text="${p.programme_name}"></td>
+                    <td th:text="${p.description}"></td>
+                    <td th:text="${p.coordinator_id}"></td>
+                    <td th:text="${p.target}"></td>
+                    <td th:text="${p.achieved}"></td>
+                    <td th:text="${p.start_date}"></td>
+                    <td th:text="${p.end_date}"></td>
+
+                    <td>
+                        <span class="status"
+                              th:classappend="${p.status == 'PLANNED' ? ' planned' : (p.status == 'ONGOING' ? ' ongoing' : (p.status == 'COMPLETED' ? ' completed' : ''))}"
+                              th:text="${p.status}"></span>
+                    </td>
+
+                    <td>
+                        <form class="edit-form"
+                              th:action="@{/programmes/update/{id}(id=${p.programme_id})}"
+                              method="post">
+
+                            <label>Programme Name</label>
+                            <input type="text" name="programme_name"
+                                   th:value="${p.programme_name}" required>
+
+                            <label>Description</label>
+                            <textarea name="description"
+                                      th:text="${p.description}" required></textarea>
+
+                            <label>Coordinator ID</label>
+                            <input type="number" name="coordinator_id"
+                                   th:value="${p.coordinator_id}" min="1" required>
+
+                            <label>Target</label>
+                            <input type="number" name="target"
+                                   th:value="${p.target}" min="0"
+                                   step="0.01" required>
+
+                            <label>Achieved</label>
+                            <input type="number" name="achieved"
+                                   th:value="${p.achieved}" min="0"
+                                   step="0.01" required>
+
+                            <label>Start Date</label>
+                            <input type="date" name="start_date"
+                                   th:value="${p.start_date}" required>
+
+                            <label>End Date</label>
+                            <input type="date" name="end_date"
+                                   th:value="${p.end_date}" required>
+
+                            <label>Status</label>
+                            <select name="status" required>
+                                <option value="PLANNED"
+                                        th:selected="${p.status == 'PLANNED'}">Planned</option>
+                                <option value="ONGOING"
+                                        th:selected="${p.status == 'ONGOING'}">Ongoing</option>
+                                <option value="COMPLETED"
+                                        th:selected="${p.status == 'COMPLETED'}">Completed</option>
+                            </select>
+
+                            <button type="submit" class="action-btn">
+                                Save Changes
+                            </button>
+                        </form>
+                    </td>
+
+                    <td>
+                        <form th:action="@{/programmes/delete/{id}(id=${p.programme_id})}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this programme?');">
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(programmes)}">
+                    <td colspan="11" class="empty">No programmes found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const programmeTable = document.getElementById("programmeTable");
+    const programmeBody = document.getElementById("programmeTableBody");
+    const searchIdInput = document.getElementById("searchId");
+    const searchMessage = document.getElementById("searchMessage");
+
+    const originalProgrammeRows = programmeBody.innerHTML;
+
+    function showAll() {
+        programmeBody.innerHTML = originalProgrammeRows;
+        programmeTable.style.display = "table";
+        searchMessage.textContent = "";
+    }
+
+    function hideAll() {
+        programmeTable.style.display = "none";
+        searchMessage.textContent = "";
+    }
+
+    function clearSearch() {
+        searchIdInput.value = "";
+        searchMessage.textContent = "";
+        programmeBody.innerHTML = originalProgrammeRows;
+        programmeTable.style.display = "none";
+        searchIdInput.focus();
+    }
+
+    function searchProgramme() {
+        const id = searchIdInput.value.trim();
+
+        if (!id || Number(id) < 1) {
+            programmeBody.innerHTML = originalProgrammeRows;
+            programmeTable.style.display = "none";
+            searchMessage.textContent = "Please enter a valid Programme ID.";
+            return;
+        }
+
+        const temporaryBody = document.createElement("tbody");
+        temporaryBody.innerHTML = originalProgrammeRows;
+
+        const rows = Array.from(
+            temporaryBody.querySelectorAll("tr[data-programme-id]")
+        );
+
+        const found = rows.find(
+            row => row.getAttribute("data-programme-id") === id
+        );
+
+        if (found) {
+            programmeBody.innerHTML = "";
+            programmeBody.appendChild(found.cloneNode(true));
+            programmeTable.style.display = "table";
+            searchMessage.textContent = "Programme found.";
+        } else {
+            programmeBody.innerHTML = originalProgrammeRows;
+            programmeTable.style.display = "none";
+            searchMessage.textContent = "Programme ID not found.";
+        }
+    }
+
+    searchIdInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchProgramme();
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Animal Management</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6f1;
+            margin: 0;
+            padding: 25px;
+            color: #24352b;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1 { color: #245c3a; text-align: center; }
+
+        .home-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 5px 0 12px;
+            border-radius: 5px;
+            background: #245c3a;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .home-btn:hover { background: #1c5734; }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccd5cc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            padding: 11px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+        }
+
+        button:hover { opacity: 0.85; }
+
+        .add { background: #27834a; }
+        .update { background: #2769a8; }
+        .show { background: #245c3a; }
+        .search { background: #7556a5; }
+        .delete { background: #c43e3e; }
+        .clear { background: #68746b; }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .search-row > div { flex: 1; }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #e0e5df;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #245c3a;
+            color: white;
+        }
+
+        tr:nth-child(even) { background: #f5f8f4; }
+
+        .message {
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            display: block;
+            background: #e1f4e5;
+            color: #205c31;
+        }
+
+        .error {
+            display: block;
+            background: #fde5e5;
+            color: #a32222;
+        }
+
+        .small-button {
+            padding: 7px 10px;
+            margin: 2px;
+        }
+
+        @media (max-width: 650px) {
+            body { padding: 12px; }
+
+            .form-grid { grid-template-columns: 1fr; }
+
+            .search-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Animal Management</h1>
+
+    <p style="text-align:center;">
+        Manage animal records in the wildlife conservation system.
+    </p>
+
+    <a class="home-btn" href="http://localhost:8080/">
+        &#8592; Home
+    </a>
+
+    <div class="card">
+        <h2 id="formTitle">Add / Update Animal</h2>
+
+        <form id="animalForm">
+            <div class="form-grid">
+
+                <div>
+                    <label for="animalId">Animal ID</label>
+                    <input type="number" id="animalId" min="1"
+                           placeholder="Enter animal ID" required>
+                </div>
+
+                <div>
+                    <label for="speciesName">Species Name</label>
+                    <input type="text" id="speciesName"
+                           placeholder="e.g. Bengal Tiger" required>
+                </div>
+
+                <div>
+                    <label for="animalTag">Animal Tag</label>
+                    <input type="text" id="animalTag"
+                           placeholder="Enter animal tag" required>
+                </div>
+
+                <div>
+                    <label for="age">Age</label>
+                    <input type="number" id="age" min="0"
+                           placeholder="Enter age" required>
+                </div>
+
+                <div>
+                    <label for="healthStatus">Health Status</label>
+                    <select id="healthStatus" required>
+                        <option value="">Select health status</option>
+                        <option value="Healthy">Healthy</option>
+                        <option value="Injured">Injured</option>
+                        <option value="Sick">Sick</option>
+                        <option value="Under Treatment">Under Treatment</option>
+                        <option value="Recovering">Recovering</option>
+                        <option value="Under Observation">Under Observation</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="zoneId">Zone ID</label>
+                    <input type="number" id="zoneId" min="1"
+                           placeholder="Enter zone ID" required>
+                </div>
+
+                <div>
+                    <label for="lastSeenLocation">Last Seen Location</label>
+                    <input type="text" id="lastSeenLocation"
+                           placeholder="Enter last seen location" required>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="add">Add Animal</button>
+
+                <button type="button" class="update" onclick="updateAnimal()">
+                    Update Animal
+                </button>
+
+                <button type="button" class="clear" onclick="clearForm()">
+                    Clear Form
+                </button>
+            </div>
+        </form>
+
+        <div id="formMessage" class="message" role="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>Search Animal</h2>
+
+        <div class="search-row">
+            <div>
+                <label for="searchId">Animal ID</label>
+                <input type="number" id="searchId"
+                       min="1" placeholder="Enter animal ID">
+            </div>
+
+            <button type="button" class="search" onclick="searchAnimal()">
+                Search
+            </button>
+        </div>
+
+        <div id="searchMessage" class="message" role="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>All Animals</h2>
+
+        <button type="button" class="show" onclick="showAllAnimals()">
+            Show All Animals
+        </button>
+
+        <button type="button" class="clear" onclick="hideAllAnimals()">
+            Hide All
+        </button>
+
+        <div id="animalsContent" style="display: none;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Animal ID</th>
+                        <th>Species</th>
+                        <th>Animal Tag</th>
+                        <th>Age</th>
+                        <th>Health Status</th>
+                        <th>Zone ID</th>
+                        <th>Last Seen Location</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="animalTable">
+                    <tr>
+                        <td colspan="8">Click Show All Animals to load records.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="tableMessage" class="message" role="status"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = "http://localhost:8081/api/animals";
+
+    function showMessage(elementId, text, success) {
+        const element = document.getElementById(elementId);
+        element.textContent = text;
+        element.className = "message " + (success ? "success" : "error");
+    }
+
+    function hideMessage(elementId) {
+        const element = document.getElementById(elementId);
+        element.textContent = "";
+        element.className = "message";
+    }
+
+    function getAnimalFromForm() {
+        return {
+            animal_id: Number(document.getElementById("animalId").value),
+            species_name: document.getElementById("speciesName").value.trim(),
+            species_tag: document.getElementById("animalTag").value.trim(),
+            age: Number(document.getElementById("age").value),
+            health_Status: document.getElementById("healthStatus").value,
+            zone_id: Number(document.getElementById("zoneId").value),
+            last_seen_location:
+                document.getElementById("lastSeenLocation").value.trim()
+        };
+    }
+
+    function validateForm() {
+        const form = document.getElementById("animalForm");
+
+        if (!form.reportValidity()) return false;
+
+        const animal = getAnimalFromForm();
+
+        if (animal.animal_id <= 0 ||
+            animal.zone_id <= 0 ||
+            animal.age < 0) {
+            showMessage(
+                "formMessage",
+                "Animal ID and Zone ID must be positive, and age cannot be negative.",
+                false
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    async function readResponse(response) {
+        const text = await response.text();
+
+        if (!response.ok) {
+            throw new Error(
+                text || "Request failed with status " + response.status
+            );
+        }
+
+        return text;
+    }
+
+    // ADD ANIMAL
+    document.getElementById("animalForm").addEventListener(
+        "submit",
+        async function(event) {
+            event.preventDefault();
+
+            if (!validateForm()) return;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(getAnimalFromForm())
+                });
+
+                await readResponse(response);
+
+                showMessage("formMessage", "Animal added successfully.", true);
+                clearForm(false);
+
+                if (document.getElementById("animalsContent").style.display !== "none") {
+                    await showAllAnimals();
+                }
+
+            } catch (error) {
+                showMessage(
+                    "formMessage",
+                    "Could not add animal: " + error.message,
+                    false
+                );
+            }
+        }
+    );
+
+    // SHOW ALL ANIMALS
+    async function showAllAnimals() {
+        document.getElementById("animalsContent").style.display = "block";
+        hideMessage("tableMessage");
+
+        try {
+            const response = await fetch(API_URL);
+
+            if (!response.ok) {
+                throw new Error("Could not retrieve animal records.");
+            }
+
+            const animals = await response.json();
+            const table = document.getElementById("animalTable");
+
+            table.replaceChildren();
+
+            if (!Array.isArray(animals) || animals.length === 0) {
+                const row = table.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 8;
+                cell.textContent = "No animal records found.";
+                return;
+            }
+
+            animals.forEach(animal => {
+                const row = table.insertRow();
+
+                const values = [
+                    animal.animal_id ?? animal.animalId,
+                    animal.species_name ?? animal.speciesName,
+                    animal.species_tag ?? animal.speciesTag,
+                    animal.age,
+                    animal.health_Status ?? animal.healthStatus,
+                    animal.zone_id ?? animal.zoneId,
+                    animal.last_seen_location ?? animal.lastSeenLocation
+                ];
+
+                values.forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value ?? "";
+                });
+
+                const actionCell = row.insertCell();
+
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.textContent = "Edit";
+                editButton.className = "small-button update";
+                editButton.onclick = () => fillForm(animal);
+                actionCell.appendChild(editButton);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "small-button delete";
+                deleteButton.onclick = () => deleteAnimal(values[0]);
+                actionCell.appendChild(deleteButton);
+            });
+
+        } catch (error) {
+            showMessage(
+                "tableMessage",
+                "Could not load animals: " + error.message,
+                false
+            );
+        }
+    }
+
+    // HIDE ALL ANIMALS
+    function hideAllAnimals() {
+        document.getElementById("animalsContent").style.display = "none";
+    }
+
+    // SEARCH ANIMAL BY ID
+    async function searchAnimal() {
+        const id = document.getElementById("searchId").value.trim();
+
+        if (!id || !Number.isFinite(Number(id)) || Number(id) <= 0) {
+            showMessage("searchMessage", "Please enter a valid Animal ID.", false);
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id)
+            );
+
+            if (!response.ok) {
+                throw new Error("Animal not found.");
+            }
+
+            const animal = await response.json();
+            fillForm(animal);
+
+            showMessage(
+                "searchMessage",
+                "Animal found and loaded into the form.",
+                true
+            );
+
+        } catch (error) {
+            showMessage("searchMessage", error.message, false);
+        }
+    }
+
+    // LOAD ANIMAL DETAILS INTO FORM
+    function fillForm(animal) {
+        document.getElementById("animalId").value =
+            animal.animal_id ?? animal.animalId ?? "";
+
+        document.getElementById("speciesName").value =
+            animal.species_name ?? animal.speciesName ?? "";
+
+        document.getElementById("animalTag").value =
+            animal.species_tag ?? animal.speciesTag ?? "";
+
+        document.getElementById("age").value = animal.age ?? "";
+
+        document.getElementById("healthStatus").value =
+            animal.health_Status ?? animal.healthStatus ?? "";
+
+        document.getElementById("zoneId").value =
+            animal.zone_id ?? animal.zoneId ?? "";
+
+        document.getElementById("lastSeenLocation").value =
+            animal.last_seen_location ?? animal.lastSeenLocation ?? "";
+
+        document.getElementById("formTitle").textContent =
+            "Edit Animal Details";
+
+        document.getElementById("animalForm").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
+    // UPDATE ANIMAL
+    async function updateAnimal() {
+        if (!validateForm()) return;
+
+        const animal = getAnimalFromForm();
+        const id = animal.animal_id;
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id),
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(animal)
+                }
+            );
+
+            await readResponse(response);
+
+            showMessage("formMessage", "Animal updated successfully.", true);
+
+            if (document.getElementById("animalsContent").style.display !== "none") {
+                await showAllAnimals();
+            }
+
+        } catch (error) {
+            showMessage(
+                "formMessage",
+                "Could not update animal: " + error.message,
+                false
+            );
+        }
+    }
+
+    // DELETE ANIMAL
+    async function deleteAnimal(id) {
+        if (id === undefined || id === null || id === "") return;
+
+        if (!confirm("Are you sure you want to delete animal ID " + id + "?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id),
+                { method: "DELETE" }
+            );
+
+            await readResponse(response);
+
+            showMessage("tableMessage", "Animal deleted successfully.", true);
+
+            if (document.getElementById("animalsContent").style.display !== "none") {
+                await showAllAnimals();
+            }
+
+        } catch (error) {
+            showMessage(
+                "tableMessage",
+                "Could not delete animal: " + error.message,
+                false
+            );
+        }
+    }
+
+    // CLEAR FORM
+    function clearForm(showMessageToo = true) {
+        document.getElementById("animalForm").reset();
+        document.getElementById("formTitle").textContent = "Add / Update Animal";
+
+        if (showMessageToo) {
+            hideMessage("formMessage");
+            hideMessage("searchMessage");
+        }
+    }
+
+    // Intentionally no automatic table loading on page load.
+</script>
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildGuard | Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f3f6f1;
+            color: #244b38;
+        }
+
+        header {
+            background: #245c3a;
+            color: white;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            font-size: 28px;
+        }
+
+        header p {
+            margin-top: 6px;
+            color: #e0eee2;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 24px;
+        }
+
+        .section-title {
+            margin: 28px 0 16px;
+            font-size: 22px;
+            color: #245c3a;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 14px rgba(36, 75, 56, 0.08);
+            border: 1px solid #e3ebe2;
+        }
+
+        .card h3 {
+            font-size: 15px;
+            color: #627568;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .number {
+            font-size: 34px;
+            font-weight: bold;
+            color: #27834a;
+        }
+
+        .description {
+            margin-top: 8px;
+            color: #7a897e;
+            font-size: 13px;
+        }
+
+        .status-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status {
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .online {
+            color: #176b35;
+            background: #dff5e5;
+        }
+
+        .offline {
+            color: #a12b2b;
+            background: #fde4e4;
+        }
+
+        .stat-card {
+            border-top: 4px solid #27834a;
+        }
+
+        .footer {
+            text-align: center;
+            color: #7a897e;
+            font-size: 13px;
+            padding: 30px 15px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 22px;
+            }
+
+            header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .number {
+                font-size: 29px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>🌿 WildGuard</h1>
+        <p>Smart Wildlife Conservation System</p>
+    </div>
+
+    <div>
+        <p>Admin Dashboard</p>
+    </div>
+</header>
+
+<main class="container">
+
+    <h2 class="section-title">Microservice Status</h2>
+
+    <div class="card-grid">
+
+        <div class="card status-card">
+            <div>
+                <h3>Wildlife Service</h3>
+                <p class="description">Animal and wildlife records</p>
+            </div>
+            <span class="status"
+                  th:classappend="${wildlifeStatus == 'Online'} ? ' online' : ' offline'"
+                  th:text="${wildlifeStatus}">Unknown</span>
+        </div>
+
+        <div class="card status-card">
+            <div>
+                <h3>Conservation Service</h3>
+                <p class="description">Conservation programmes</p>
+            </div>
+            <span class="status"
+                  th:classappend="${conservationStatus == 'Online'} ? ' online' : ' offline'"
+                  th:text="${conservationStatus}">Unknown</span>
+        </div>
+
+        <div class="card status-card">
+            <div>
+                <h3>Incident Service</h3>
+                <p class="description">Incidents and rescue cases</p>
+            </div>
+            <span class="status"
+                  th:classappend="${incidentStatus == 'Online'} ? ' online' : ' offline'"
+                  th:text="${incidentStatus}">Unknown</span>
+        </div>
+
+        <div class="card status-card">
+            <div>
+                <h3>Field Operations</h3>
+                <p class="description">Patrols, staff and resources</p>
+            </div>
+            <span class="status"
+                  th:classappend="${fieldStatus == 'Online'} ? ' online' : ' offline'"
+                  th:text="${fieldStatus}">Unknown</span>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">Wildlife Statistics</h2>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <h3>Total Animals</h3>
+            <p class="number" th:text="${stats.totalAnimals}">0</p>
+            <p class="description">Registered animals</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Healthy Animals</h3>
+            <p class="number" th:text="${stats.healthyAnimals}">0</p>
+            <p class="description">Animals marked healthy</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Injured Animals</h3>
+            <p class="number" th:text="${stats.injuredAnimals}">0</p>
+            <p class="description">Animals marked injured</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Conservation and Incident Statistics</h2>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <h3>Conservation Programmes</h3>
+            <p class="number" th:text="${stats.totalProgrammes}">0</p>
+            <p class="description">Total programmes</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Total Incidents</h3>
+            <p class="number" th:text="${stats.totalIncidents}">0</p>
+            <p class="description">Reported incidents</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Rescue Cases</h3>
+            <p class="number" th:text="${stats.totalRescues}">0</p>
+            <p class="description">Total rescue cases</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Field Operations Statistics</h2>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <h3>Total Patrols</h3>
+            <p class="number" th:text="${stats.totalPatrols}">0</p>
+            <p class="description">All patrol assignments</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Scheduled Patrols</h3>
+            <p class="number" th:text="${stats.scheduledPatrols}">0</p>
+            <p class="description">Patrols awaiting execution</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Ongoing Patrols</h3>
+            <p class="number" th:text="${stats.ongoingPatrols}">0</p>
+            <p class="description">Currently in progress</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Completed Patrols</h3>
+            <p class="number" th:text="${stats.completedPatrols}">0</p>
+            <p class="description">Finished patrols</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Total Staff</h3>
+            <p class="number" th:text="${stats.totalStaff}">0</p>
+            <p class="description">Registered field staff</p>
+        </div>
+
+        <div class="card stat-card">
+            <h3>Total Resources</h3>
+            <p class="number" th:text="${stats.totalResources}">0</p>
+            <p class="description">Registered field resources</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    WildGuard Smart Wildlife Conservation System
+</footer>
+
+</body>
+</html>

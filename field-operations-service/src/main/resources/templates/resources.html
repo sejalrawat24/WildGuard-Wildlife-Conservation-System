@@ -1,0 +1,697 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Management</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5ef;
+            color: #263b2e;
+        }
+
+        header {
+            background: #244b38;
+            color: white;
+            padding: 22px 8%;
+        }
+
+        header h1 { margin: 0; }
+
+        header p {
+            color: #dce8dd;
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .home-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 0 0 20px;
+            border-radius: 6px;
+            background: #245c3a;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .home-btn:hover {
+            background: #193827;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        h2 {
+            color: #244b38;
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 17px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5cc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        button {
+            margin: 8px 5px 0 0;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #244b38;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover { background: #193827; }
+
+        .btn-show { background: #27834a; }
+        .btn-show:hover { background: #1d6638; }
+
+        .btn-hide, .btn-clear, .btn-cancel { background: #68776c; }
+        .btn-hide:hover, .btn-clear:hover, .btn-cancel:hover {
+            background: #4d5b51;
+        }
+
+        .btn-search { background: #346f91; }
+        .btn-search:hover { background: #24536e; }
+
+        .btn-delete { background: #b83b32; }
+        .btn-delete:hover { background: #922c25; }
+
+        .btn-edit { background: #b77a20; }
+        .btn-edit:hover { background: #925e14; }
+
+        .message {
+            display: none;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            background: #e5f3e7;
+            color: #245c32;
+            overflow-wrap: anywhere;
+        }
+
+        .message.error {
+            background: #fbe8e6;
+            color: #8b2923;
+        }
+
+        .management-controls {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .search-field {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e6df;
+            font-size: 14px;
+        }
+
+        th {
+            background: #244b38;
+            color: white;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover { background: #f3f7f1; }
+
+        td button {
+            margin: 2px;
+            padding: 8px 12px;
+        }
+
+        .empty-message {
+            color: #68776c;
+            padding: 15px 0;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .card { padding: 20px; }
+            header { padding: 20px 6%; }
+
+            .management-controls {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .management-controls button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Wildlife Conservation System</h1>
+    <p>Resource Management</p>
+</header>
+
+<div class="container">
+
+    <!-- HOME BUTTON -->
+    <a class="home-btn" href="http://localhost:8080/">
+        &#8592; Home
+    </a>
+
+    <!-- ADD AND UPDATE RESOURCE -->
+    <section class="card">
+        <h2 id="formHeading">Resource Management</h2>
+
+        <form id="resourceForm">
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="resource_name">Resource Name:</label>
+                    <input type="text" id="resource_name"
+                           name="resource_name" required>
+                </div>
+
+                <div class="field">
+                    <label for="resource_type">Resource Type:</label>
+                    <select id="resource_type" name="resource_type" required>
+                        <option value="">Select Type</option>
+                        <option value="Vehicle">Vehicle</option>
+                        <option value="Medical Kit">Medical Kit</option>
+                        <option value="Camera">Camera</option>
+                        <option value="Radio">Radio</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="registration_number">Registration Number:</label>
+                    <input type="text" id="registration_number"
+                           name="registration_number">
+                </div>
+
+                <div class="field">
+                    <label for="condition_status">Condition:</label>
+                    <select id="condition_status"
+                            name="condition_status" required>
+                        <option value="">Select Condition</option>
+                        <option value="GOOD">Good</option>
+                        <option value="DAMAGED">Damaged</option>
+                        <option value="UNDER_REPAIR">Under Repair</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="availability_status">Availability Status:</label>
+                    <select id="availability_status"
+                            name="availability_status" required>
+                        <option value="">Select Availability</option>
+                        <option value="AVAILABLE">Available</option>
+                        <option value="ASSIGNED">Assigned</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="assigned_staff_id">Assigned Staff ID:</label>
+                    <input type="number" id="assigned_staff_id"
+                           name="assigned_staff_id" min="0"
+                           value="0" required>
+                </div>
+
+            </div>
+
+            <button type="submit" id="submitButton">Save Resource</button>
+            <button type="button" id="cancelUpdateButton"
+                    class="btn-cancel" style="display:none;">
+                Cancel Update
+            </button>
+
+            <div id="resourceMessage" class="message"
+                 role="status" aria-live="polite"></div>
+        </form>
+    </section>
+
+    <!-- SEARCH AND DISPLAY RESOURCES -->
+    <section class="card">
+        <h2>Resource Records</h2>
+
+        <div class="management-controls">
+            <div class="field search-field">
+                <label for="searchResourceId">Search by Resource ID:</label>
+                <input type="number" id="searchResourceId"
+                       min="1" placeholder="Enter resource ID">
+            </div>
+
+            <button type="button" class="btn-search" id="searchButton">
+                Search by ID
+            </button>
+
+            <button type="button" class="btn-show" id="showAllButton">
+                Show All
+            </button>
+
+            <button type="button" class="btn-hide" id="hideAllButton">
+                Hide All
+            </button>
+
+            <button type="button" class="btn-clear" id="clearSearchButton">
+                Clear Search
+            </button>
+        </div>
+
+        <div id="listMessage" class="message"
+             role="status" aria-live="polite"></div>
+
+        <div id="resourceContent" style="display:none;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource ID</th>
+                            <th>Resource Name</th>
+                            <th>Resource Type</th>
+                            <th>Registration Number</th>
+                            <th>Condition</th>
+                            <th>Availability</th>
+                            <th>Assigned Staff ID</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="resourceTableBody">
+                        <tr th:each="r : ${resources}"
+                            th:attr="data-id=${r.resource_id},
+                                     data-name=${r.resource_name},
+                                     data-type=${r.resource_type},
+                                     data-registration=${r.registration_number},
+                                     data-condition=${r.condition_status},
+                                     data-availability=${r.availability_status},
+                                     data-staff=${r.assigned_staff_id}">
+
+                            <td th:text="${r.resource_id}"></td>
+                            <td th:text="${r.resource_name}"></td>
+                            <td th:text="${r.resource_type}"></td>
+                            <td th:text="${r.registration_number}"></td>
+                            <td th:text="${r.condition_status}"></td>
+                            <td th:text="${r.availability_status}"></td>
+                            <td th:text="${r.assigned_staff_id}"></td>
+
+                            <td>
+                                <button type="button" class="btn-edit">Edit</button>
+                                <button type="button" class="btn-delete">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="emptyMessage" class="empty-message"
+               style="display:none;">No resources found.</p>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    const API_URL = "/resources/api";
+
+    const resourceForm = document.getElementById("resourceForm");
+    const resourceMessage = document.getElementById("resourceMessage");
+    const listMessage = document.getElementById("listMessage");
+    const resourceContent = document.getElementById("resourceContent");
+    const resourceTableBody = document.getElementById("resourceTableBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const searchResourceId = document.getElementById("searchResourceId");
+
+    const formHeading = document.getElementById("formHeading");
+    const submitButton = document.getElementById("submitButton");
+    const cancelUpdateButton = document.getElementById("cancelUpdateButton");
+
+    let editingResourceId = null;
+
+    function showMessage(element, message, isError = false) {
+        element.style.display = "block";
+        element.className = isError ? "message error" : "message";
+        element.textContent = message;
+    }
+
+    function hideMessage(element) {
+        element.style.display = "none";
+        element.textContent = "";
+    }
+
+    function getPayload() {
+        const formData = new FormData(resourceForm);
+
+        return {
+            resource_name: formData.get("resource_name"),
+            resource_type: formData.get("resource_type"),
+            registration_number: formData.get("registration_number") || null,
+            condition_status: formData.get("condition_status"),
+            availability_status: formData.get("availability_status"),
+            assigned_staff_id: Number(formData.get("assigned_staff_id"))
+        };
+    }
+
+    async function readResponse(response) {
+        const text = await response.text();
+
+        if (!response.ok) {
+            throw new Error(text || "Request failed: " + response.status);
+        }
+
+        return text;
+    }
+
+    function createCell(value) {
+        const cell = document.createElement("td");
+        cell.textContent = value ?? "";
+        return cell;
+    }
+
+    function createResourceRow(resource) {
+        const id = resource.resource_id;
+        const row = document.createElement("tr");
+
+        row.dataset.id = id;
+        row.dataset.name = resource.resource_name ?? "";
+        row.dataset.type = resource.resource_type ?? "";
+        row.dataset.registration = resource.registration_number ?? "";
+        row.dataset.condition = resource.condition_status ?? "";
+        row.dataset.availability = resource.availability_status ?? "";
+        row.dataset.staff = resource.assigned_staff_id ?? 0;
+
+        [
+            resource.resource_id,
+            resource.resource_name,
+            resource.resource_type,
+            resource.registration_number,
+            resource.condition_status,
+            resource.availability_status,
+            resource.assigned_staff_id
+        ].forEach(value => row.appendChild(createCell(value)));
+
+        const actionCell = document.createElement("td");
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "btn-edit";
+        editButton.textContent = "Edit";
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "btn-delete";
+        deleteButton.textContent = "Delete";
+
+        actionCell.appendChild(editButton);
+        actionCell.appendChild(deleteButton);
+        row.appendChild(actionCell);
+
+        return row;
+    }
+
+    function displayRows(rows) {
+        resourceTableBody.innerHTML = "";
+
+        rows.forEach(resource => {
+            resourceTableBody.appendChild(createResourceRow(resource));
+        });
+
+        resourceContent.style.display = "block";
+        emptyMessage.style.display = rows.length === 0 ? "block" : "none";
+    }
+
+    // ADD OR UPDATE RESOURCE
+    resourceForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const updating = editingResourceId !== null;
+
+        const url = updating
+            ? `/resources/${encodeURIComponent(editingResourceId)}`
+            : API_URL;
+
+        showMessage(
+            resourceMessage,
+            updating ? "Updating resource..." : "Saving resource..."
+        );
+
+        try {
+            const response = await fetch(url, {
+                method: updating ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(getPayload())
+            });
+
+            const message = await readResponse(response);
+
+            showMessage(
+                resourceMessage,
+                message || (updating
+                    ? "Resource updated successfully!"
+                    : "Resource saved successfully!")
+            );
+
+            window.location.reload();
+
+        } catch (error) {
+            showMessage(resourceMessage, error.message, true);
+        }
+    });
+
+    // SHOW ALL
+    document.getElementById("showAllButton").addEventListener("click", function() {
+        searchResourceId.value = "";
+
+        const rows = Array.from(resourceTableBody.querySelectorAll("tr"));
+
+        rows.forEach(row => row.style.display = "");
+
+        resourceContent.style.display = "block";
+        emptyMessage.style.display = rows.length === 0 ? "block" : "none";
+        hideMessage(listMessage);
+    });
+
+    // HIDE ALL
+    document.getElementById("hideAllButton").addEventListener("click", function() {
+        resourceContent.style.display = "none";
+        hideMessage(listMessage);
+    });
+
+    // SEARCH BY ID
+    async function searchResource() {
+        const id = searchResourceId.value.trim();
+
+        if (!id) {
+            showMessage(listMessage, "Please enter a Resource ID.", true);
+            return;
+        }
+
+        hideMessage(listMessage);
+        showMessage(listMessage, "Searching for resource...");
+
+        try {
+            const response = await fetch(
+                `/resources/${encodeURIComponent(id)}`,
+                { headers: { "Accept": "application/json" } }
+            );
+
+            if (response.status === 404) {
+                displayRows([]);
+                showMessage(listMessage, "No resource found with ID " + id + ".");
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Server error: " + response.status);
+            }
+
+            const resource = await response.json();
+
+            if (resource.resource_id === undefined ||
+                resource.resource_id === null) {
+                throw new Error("The server response does not contain resource_id.");
+            }
+
+            displayRows([resource]);
+            hideMessage(listMessage);
+
+        } catch (error) {
+            showMessage(
+                listMessage,
+                error.message || "Could not search for resource.",
+                true
+            );
+        }
+    }
+
+    document.getElementById("searchButton")
+        .addEventListener("click", searchResource);
+
+    searchResourceId.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchResource();
+        }
+    });
+
+    // CLEAR SEARCH
+    document.getElementById("clearSearchButton").addEventListener("click", function() {
+        searchResourceId.value = "";
+        hideMessage(listMessage);
+        resourceContent.style.display = "none";
+    });
+
+    // EDIT OR DELETE A DISPLAYED ROW
+    resourceTableBody.addEventListener("click", async function(event) {
+        const row = event.target.closest("tr");
+
+        if (!row) return;
+
+        if (event.target.classList.contains("btn-edit")) {
+            editResource(row);
+        }
+
+        if (event.target.classList.contains("btn-delete")) {
+            await deleteResource(row.dataset.id);
+        }
+    });
+
+    function editResource(row) {
+        editingResourceId = row.dataset.id;
+
+        document.getElementById("resource_name").value = row.dataset.name;
+        document.getElementById("resource_type").value = row.dataset.type;
+        document.getElementById("registration_number").value =
+            row.dataset.registration;
+        document.getElementById("condition_status").value =
+            row.dataset.condition;
+        document.getElementById("availability_status").value =
+            row.dataset.availability;
+        document.getElementById("assigned_staff_id").value =
+            row.dataset.staff || 0;
+
+        formHeading.textContent = "Update Resource";
+        submitButton.textContent = "Update Resource";
+        cancelUpdateButton.style.display = "inline-block";
+
+        showMessage(
+            resourceMessage,
+            "Editing resource ID " + editingResourceId +
+            ". Make your changes and click Update Resource."
+        );
+
+        resourceForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // CANCEL UPDATE
+    function resetResourceForm() {
+        resourceForm.reset();
+        editingResourceId = null;
+
+        formHeading.textContent = "Resource Management";
+        submitButton.textContent = "Save Resource";
+        cancelUpdateButton.style.display = "none";
+    }
+
+    cancelUpdateButton.addEventListener("click", function() {
+        resetResourceForm();
+        hideMessage(resourceMessage);
+    });
+
+    // DELETE RESOURCE
+    async function deleteResource(id) {
+        if (!id) {
+            showMessage(listMessage, "Resource ID is missing.", true);
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete resource ID " + id + "?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/resources/${encodeURIComponent(id)}`,
+                { method: "DELETE" }
+            );
+
+            const message = await readResponse(response);
+
+            showMessage(
+                listMessage,
+                message || "Resource deleted successfully!"
+            );
+
+            window.location.reload();
+
+        } catch (error) {
+            showMessage(listMessage, error.message, true);
+        }
+    }
+
+    // Keep records hidden until Show All or Search is clicked.
+    resourceContent.style.display = "none";
+</script>
+
+</body>
+</html>

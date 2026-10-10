@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildGuard | Protected Areas</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6f1;
+            color: #26382c;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1, h2 { color: #245c3a; }
+
+        .home-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 5px 0 12px;
+            border-radius: 5px;
+            background: #245c3a;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .home-btn:hover { background: #1c5734; }
+
+        .card {
+            background: white;
+            padding: 22px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px #00000012;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccd5cc;
+            border-radius: 5px;
+        }
+
+        textarea { min-height: 75px; }
+
+        button {
+            border: none;
+            padding: 10px 14px;
+            margin: 8px 5px 0 0;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover { opacity: 0.85; }
+
+        .add { background: #27834a; }
+        .update { background: #2769a8; }
+        .show { background: #245c3a; }
+        .search { background: #7556a5; }
+        .delete { background: #c43e3e; }
+        .clear { background: #68746b; }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #245c3a;
+            color: white;
+        }
+
+        tr:nth-child(even) { background: #f5f8f4; }
+
+        .message {
+            margin-top: 12px;
+            padding: 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            background: #e1f4e5;
+            color: #205c31;
+        }
+
+        .error {
+            background: #fde5e5;
+            color: #a32222;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .search-row div { flex: 1; }
+
+        @media (max-width: 650px) {
+            body { padding: 12px; }
+            .grid { grid-template-columns: 1fr; }
+
+            .search-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Protected Areas and Zones Management</h1>
+
+    <a class="home-btn" href="http://localhost:8080/">
+        &#8592; Home
+    </a>
+
+    <div class="card">
+        <h2 id="formTitle">Add Protected Area</h2>
+
+        <form id="areaForm">
+            <div class="grid">
+                <div>
+                    <label for="areaId">Area ID</label>
+                    <input type="number" id="areaId" min="1" required>
+                </div>
+
+                <div>
+                    <label for="areaName">Area Name</label>
+                    <input type="text" id="areaName" required>
+                </div>
+
+                <div>
+                    <label for="location">Location</label>
+                    <input type="text" id="location" required>
+                </div>
+
+                <div>
+                    <label for="areaSize">Area Size</label>
+                    <input type="number" id="areaSize"
+                           min="0" step="0.01" required>
+                </div>
+
+                <div>
+                    <label for="description">Description</label>
+                    <textarea id="description"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="add">Add Protected Area</button>
+            <button type="button" class="update" onclick="updateArea()">
+                Update Protected Area
+            </button>
+            <button type="button" class="clear" onclick="clearForm()">
+                Clear Form
+            </button>
+        </form>
+
+        <div id="formMessage" aria-live="polite"></div>
+    </div>
+
+    <div class="card">
+        <h2>Search Protected Area</h2>
+
+        <div class="search-row">
+            <div>
+                <label for="searchId">Area ID</label>
+                <input type="number" id="searchId" min="1">
+            </div>
+
+            <button type="button" class="search" onclick="searchArea()">
+                Search
+            </button>
+        </div>
+
+        <div id="searchMessage" aria-live="polite"></div>
+    </div>
+
+    <div class="card">
+        <h2>All Protected Areas</h2>
+
+        <button type="button" class="show" onclick="showAllAreas()">
+            Show All Areas
+        </button>
+
+        <button type="button" class="clear" onclick="hideAllAreas()">
+            Hide All
+        </button>
+
+        <div id="areasContent" style="display: none;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Area ID</th>
+                        <th>Area Name</th>
+                        <th>Location</th>
+                        <th>Area Size</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="areaTable">
+                    <tr>
+                        <td colspan="6">Click Show All Areas to load records.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="tableMessage" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Zones</h2>
+        <p>
+            Zone management requires the corresponding zone API endpoints
+            and frontend forms. This page currently manages protected areas.
+        </p>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = "/api/protected-areas";
+    const AREAS_URL = API_URL + "/all";
+
+    function getValue(obj, ...keys) {
+        for (const key of keys) {
+            if (obj[key] !== undefined && obj[key] !== null) {
+                return obj[key];
+            }
+        }
+        return "";
+    }
+
+    function message(id, text, success) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = "message " + (success ? "success" : "error");
+    }
+
+    function clearMessage(id) {
+        const el = document.getElementById(id);
+        el.textContent = "";
+        el.className = "";
+    }
+
+    function getFormData() {
+        return {
+            area_id: Number(document.getElementById("areaId").value),
+            area_name: document.getElementById("areaName").value.trim(),
+            location: document.getElementById("location").value.trim(),
+            area_size: Number(document.getElementById("areaSize").value),
+            description: document.getElementById("description").value.trim()
+        };
+    }
+
+    function validateForm() {
+        const form = document.getElementById("areaForm");
+
+        if (!form.reportValidity()) return false;
+
+        const area = getFormData();
+
+        if (!Number.isFinite(area.area_id) || area.area_id <= 0) {
+            message("formMessage", "Enter a valid positive Area ID.", false);
+            return false;
+        }
+
+        if (!area.area_name) {
+            message("formMessage", "Area name is required.", false);
+            return false;
+        }
+
+        if (!area.location) {
+            message("formMessage", "Location is required.", false);
+            return false;
+        }
+
+        if (!Number.isFinite(area.area_size) || area.area_size < 0) {
+            message("formMessage", "Enter a valid non-negative area size.", false);
+            return false;
+        }
+
+        return true;
+    }
+
+    async function getError(response) {
+        const text = await response.text();
+        throw new Error(text || "Request failed: " + response.status);
+    }
+
+    // ADD PROTECTED AREA
+    document.getElementById("areaForm").addEventListener(
+        "submit",
+        async function(event) {
+            event.preventDefault();
+
+            if (!validateForm()) return;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(getFormData())
+                });
+
+                if (!response.ok) await getError(response);
+
+                message("formMessage", "Protected area added successfully.", true);
+                clearForm(false);
+
+                if (document.getElementById("areasContent").style.display !== "none") {
+                    await showAllAreas();
+                }
+
+            } catch (error) {
+                message("formMessage", "Could not add area: " + error.message, false);
+            }
+        }
+    );
+
+    // SHOW ALL PROTECTED AREAS
+    async function showAllAreas() {
+        document.getElementById("areasContent").style.display = "block";
+        clearMessage("tableMessage");
+
+        try {
+            const response = await fetch(AREAS_URL);
+
+            if (!response.ok) await getError(response);
+
+            const areas = await response.json();
+            const table = document.getElementById("areaTable");
+
+            table.replaceChildren();
+
+            if (!Array.isArray(areas) || areas.length === 0) {
+                const row = table.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 6;
+                cell.textContent = "No protected areas found.";
+                return;
+            }
+
+            areas.forEach(area => {
+                const id = getValue(area, "area_id", "areaId", "id");
+                const row = table.insertRow();
+
+                [
+                    id,
+                    getValue(area, "area_name", "areaName"),
+                    getValue(area, "location"),
+                    getValue(area, "area_size", "areaSize"),
+                    getValue(area, "description")
+                ].forEach(value => {
+                    row.insertCell().textContent = value;
+                });
+
+                const actions = row.insertCell();
+
+                const edit = document.createElement("button");
+                edit.type = "button";
+                edit.textContent = "Edit";
+                edit.className = "update";
+                edit.onclick = () => fillForm(area);
+                actions.appendChild(edit);
+
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "Delete";
+                remove.className = "delete";
+                remove.onclick = () => deleteArea(id);
+                actions.appendChild(remove);
+            });
+
+        } catch (error) {
+            message("tableMessage", "Could not load areas: " + error.message, false);
+        }
+    }
+
+    // HIDE ALL PROTECTED AREAS
+    function hideAllAreas() {
+        document.getElementById("areasContent").style.display = "none";
+    }
+
+    // SEARCH PROTECTED AREA
+    async function searchArea() {
+        const id = document.getElementById("searchId").value.trim();
+
+        if (!id || !Number.isFinite(Number(id)) || Number(id) <= 0) {
+            message("searchMessage", "Enter a valid Area ID.", false);
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id)
+            );
+
+            if (response.status === 404) {
+                throw new Error("Protected area not found.");
+            }
+
+            if (!response.ok) await getError(response);
+
+            const area = await response.json();
+
+            fillForm(area);
+            message("searchMessage", "Protected area found and loaded into the form.", true);
+
+        } catch (error) {
+            message("searchMessage", "Could not search: " + error.message, false);
+        }
+    }
+
+    // LOAD AREA INTO FORM
+    function fillForm(area) {
+        const id = getValue(area, "area_id", "areaId", "id");
+
+        if (id === "") {
+            message("formMessage", "Cannot edit: the selected area has no ID.", false);
+            return;
+        }
+
+        document.getElementById("areaId").value = id;
+        document.getElementById("areaName").value =
+            getValue(area, "area_name", "areaName");
+        document.getElementById("location").value =
+            getValue(area, "location");
+        document.getElementById("areaSize").value =
+            getValue(area, "area_size", "areaSize");
+        document.getElementById("description").value =
+            getValue(area, "description");
+
+        document.getElementById("formTitle").textContent = "Edit Protected Area";
+        document.getElementById("formMessage").textContent = "";
+
+        document.getElementById("areaForm").scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+
+    // UPDATE PROTECTED AREA
+    async function updateArea() {
+        if (!validateForm()) return;
+
+        const area = getFormData();
+        const id = document.getElementById("areaId").value.trim();
+
+        if (!id || !Number.isFinite(Number(id)) || Number(id) <= 0) {
+            message("formMessage", "Enter a valid Area ID to update.", false);
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id),
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(area)
+                }
+            );
+
+            if (!response.ok) await getError(response);
+
+            message("formMessage", "Protected area updated successfully.", true);
+
+            if (document.getElementById("areasContent").style.display !== "none") {
+                await showAllAreas();
+            }
+
+        } catch (error) {
+            message("formMessage", "Could not update area: " + error.message, false);
+        }
+    }
+
+    // DELETE PROTECTED AREA
+    async function deleteArea(id) {
+        if (id === "" || id === undefined || id === null) {
+            message("tableMessage", "Cannot delete: Area ID is missing.", false);
+            return;
+        }
+
+        if (!confirm("Delete protected area ID " + id + "?")) return;
+
+        try {
+            const response = await fetch(
+                API_URL + "/" + encodeURIComponent(id),
+                { method: "DELETE" }
+            );
+
+            if (!response.ok) await getError(response);
+
+            message("tableMessage", "Protected area deleted successfully.", true);
+
+            if (document.getElementById("areasContent").style.display !== "none") {
+                await showAllAreas();
+            }
+
+        } catch (error) {
+            message("tableMessage", "Could not delete area: " + error.message, false);
+        }
+    }
+
+    // CLEAR FORM
+    function clearForm(showMessage = true) {
+        document.getElementById("areaForm").reset();
+        document.getElementById("formTitle").textContent = "Add Protected Area";
+
+        if (showMessage) {
+            clearMessage("formMessage");
+            clearMessage("searchMessage");
+        }
+    }
+
+    // Intentionally no automatic table loading on page load.
+</script>
+
+</body>
+</html>

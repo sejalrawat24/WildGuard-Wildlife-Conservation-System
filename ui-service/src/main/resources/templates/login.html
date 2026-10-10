@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Staff Login | Wildlife Conservation</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: Arial, sans-serif;
+            background: #f2f5ef;
+            color: #243b2b;
+        }
+
+        .left-panel {
+            width: 55%;
+            background: #174b32;
+            color: white;
+            padding: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left-panel h1 {
+            font-size: 42px;
+            line-height: 1.2;
+            margin-bottom: 18px;
+        }
+
+        .left-panel p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: #d7e6d8;
+            max-width: 440px;
+        }
+
+        .brand {
+            font-size: 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 35px;
+            color: #c8dfbd;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 390px;
+        }
+
+        .login-card h2 {
+            font-size: 29px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #738074;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d5ddd3;
+            border-radius: 8px;
+            background: white;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #83a98a;
+            border-color: #286641;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 28px;
+            background: #23643e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #174b32;
+        }
+
+        .error {
+            color: #b42318;
+            font-size: 14px;
+        }
+
+        .footer {
+            margin-top: 28px;
+            color: #829083;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                width: 100%;
+                padding: 35px 28px;
+            }
+
+            .left-panel h1 {
+                font-size: 30px;
+            }
+
+            .right-panel {
+                padding: 40px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="left-panel">
+        <div class="brand">Wildlife Conservation</div>
+
+        <h1>Protecting wildlife.<br>Preserving tomorrow.</h1>
+
+        <p>
+            The staff portal for managing wildlife records,
+            rescue operations, field activities and conservation
+            programmes.
+        </p>
+    </section>
+
+    <section class="right-panel">
+        <div class="login-card">
+
+            <h2>Staff Sign In</h2>
+
+            <p class="subtitle">
+                Sign in with your registered staff credentials
+                to access the management dashboard.
+            </p>
+
+            <p class="error"
+               th:if="${error}"
+               th:text="${error}"></p>
+
+            <form th:action="@{/login}" method="post">
+
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your staff username"
+                    autocomplete="username"
+                    required>
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required>
+
+                <button type="submit">Sign In</button>
+
+            </form>
+
+            <div class="footer">
+                Authorized staff only
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>
